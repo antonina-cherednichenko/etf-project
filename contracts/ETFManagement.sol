@@ -12,9 +12,9 @@ contract ETFManagement {
     public
     view
     returns (bytes info)
-    {
+  {
        return "Security basket for S&P 500: 1) SPDR S&P 500 ETF (SPY), 2) iShares Core S&P 500 ETF (IVV) 3) Vanguard S&P 500 ETF (VOO)"
-    }
+  }
 
   function buyETFCoins(uint256 tokenAmount)
     public
