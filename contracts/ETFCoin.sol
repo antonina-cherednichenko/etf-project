@@ -1,6 +1,6 @@
 pragma solidity >=0.4.21 <0.6.0;
 
-import "zeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
+import "openzeppelin-solidity/contracts/token/ERC20/ERC20Mintable.sol";
 
 
 /**

@@ -1,7 +1,7 @@
 pragma solidity >=0.4.21 <0.6.0;
 
-import "zeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol";
-import "zeppelin-solidity/contracts/math/SafeMath.sol";
+import "openzeppelin-solidity/contracts/crowdsale/emission/MintedCrowdsale.sol";
+import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract ETFCrowdsale is MintedCrowdsale {
 
