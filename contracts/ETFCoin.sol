@@ -8,11 +8,5 @@ import "openzeppelin-solidity/contracts/token/ERC20/ERC20Detailed.sol";
  * A basic token for selected investment strategy
  */
 contract ETFCoin is ERC20Mintable, ERC20Detailed {
-    /* string public constant name = "ETF Coin";
-    string public constant symbol = "ETF";
-    uint8  public constant decimals = 18;
-
-    constructor() public {
-        super(name, symbol, decimals);
-    } */
+  
 }
