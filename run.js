@@ -36,6 +36,17 @@ function getTradeOAuthURL() {
    });
 }
 
+var getTradeItTokens = function(oAuthVerifier) {
+  let options = {
+      method: 'post',
+      body: {'apiKey': 'tradeit-test-api-key', 'oAuthVerifier': oAuthVerifier},
+      json: true,
+      url: 'https://ems.qa.tradingticket.com/api/v1/user/getOAuthAccessToken'
+    };
+    request(options);
+    
+};
+
 getTradeOAuthURL().then(res => {
   console.log("res = ", res)
 })
