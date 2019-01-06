@@ -20,6 +20,7 @@
     "openzeppelin-solidity": "^2.0.0",
     "opn": "^5.4.0",
     "pug": "^2.0.3",
+    "puppeteer": "^1.11.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "swagger-jsdoc": "^3.2.6",
