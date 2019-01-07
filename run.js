@@ -2,7 +2,7 @@ var request = require('request-promise');
 const puppeteer = require('puppeteer');
 
 function getTradeOAuthURL() {
-  return new Promise(function(resolve, reject) {
+  return new Promise((resolve, reject) => {
     let options = {
         method: 'post',
         body: {'apiKey': 'tradeit-test-api-key'},
@@ -34,6 +34,40 @@ function getTradeOAuthURL() {
       })
    });
 }
+var browser;
+
+function getTradeOAuthVerifier(tradeOAuthURL) {
+   return new Promise(async(resolve, reject) => {
+     //const browser = await puppeteer.launch({headless: true});
+     browser = await puppeteer.launch({
+       args: ['--disable-features=site-per-process'],
+       headless: false
+     });
+     const page = await browser.newPage();
+     await page.goto(tradeOAuthURL, { waitUntil: 'networkidle2'});
+
+     //Fill form fields and submit
+     const frame = await page.frames().find(f => f.name() === 'LoginForm');
+     const loginUser = await frame.$('#loginUser');
+     const loginPwd = await frame.$('#loginPwd');
+     await loginUser.click({ clickCount: 3 });
+     await page.keyboard.type('dummy');
+     await loginPwd.click({ clickCount: 3 });
+     await page.keyboard.type('dummy');
+     const loginBtn = await frame.$('button');
+     await loginBtn.click();
+
+     await page.exposeFunction('resolve', resolve);
+
+     await page.evaluate(() => {
+       window.addEventListener('message', (e) => {
+         let data = JSON.parse(e.data);
+         return resolve(data.oAuthVerifier);
+       }, false);
+     });
+   })
+}
+
 
 var getTradeItTokens = function(oAuthVerifier) {
   let options = {
@@ -46,33 +80,9 @@ var getTradeItTokens = function(oAuthVerifier) {
 
 };
 
-getTradeOAuthURL().then(async (res) => {
-  console.log("res = ", res)
-  //const browser = await puppeteer.launch({headless: true});
-  const browser = await puppeteer.launch({
-  args: ['--disable-features=site-per-process'],
-  headless: false
-}) ;
-  const page = await browser.newPage();
-  await page.goto(res, { waitUntil: 'networkidle2'});
-  const frame = await page.frames().find(f => f.name() === 'LoginForm');
-  const loginUser = await frame.$('#loginUser');
-  const loginPwd = await frame.$('#loginPwd');
-  await loginUser.click();
-  await page.keyboard.type('dummy');
-  await loginPwd.click();
-  await page.keyboard.type('dummy');
-  const loginBtn = await frame.$('button');
-  await loginBtn.click();
-
-
-  await page.evaluate(() => {
-    window.addEventListener('message', async (e) => {
-      var data = JSON.parse(e.data);
-      var oAuthVerifier = data.oAuthVerifier;
-      console.log("oauth verifier = ", oAuthVerifier);
-      browser.close();
-      }, false);
-    //browser.close();
-  });
-})
+getTradeOAuthURL()
+  .then(tradeOAuthURL => {
+    console.log("tradeOauthURL = ", tradeOAuthURL);
+    return getTradeOAuthVerifier(tradeOAuthURL);
+  })
+  .then(tradeOAuthVerifier => console.log("VERIFIER = ", tradeOAuthVerifier));
