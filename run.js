@@ -48,37 +48,31 @@ var getTradeItTokens = function(oAuthVerifier) {
 
 getTradeOAuthURL().then(async (res) => {
   console.log("res = ", res)
-  const browser = await puppeteer.launch();
+  //const browser = await puppeteer.launch({headless: true});
+  const browser = await puppeteer.launch({
+  args: ['--disable-features=site-per-process'],
+  headless: false
+}) ;
   const page = await browser.newPage();
-  await page.goto(res, {waitUntil: 'networkidle2'});
-  console.log("RES1")
-  //await page.waitFor('input[id="loginUser.credFields"]');
-  console.log("RES2")
-  await page.$('#loginUser', el => el.value = 'dummy');
-  console.log("RES3")
-  await page.$('#loginPwd', el => el.value = 'dummy');
-  console.log("RES4")
-  const loginForm = await page.$('#LoginForm');
-  const res5 = await loginForm.$(loginForm => loginForm.submit());
+  await page.goto(res, { waitUntil: 'networkidle2'});
+  const frame = await page.frames().find(f => f.name() === 'LoginForm');
+  const loginUser = await frame.$('#loginUser');
+  const loginPwd = await frame.$('#loginPwd');
+  await loginUser.click();
+  await page.keyboard.type('dummy');
+  await loginPwd.click();
+  await page.keyboard.type('dummy');
+  const loginBtn = await frame.$('button');
+  await loginBtn.click();
+
 
   await page.evaluate(() => {
-        window.addEventListener('offline', () => {
-            console.log('offline-flag');
-        }, false);
-    });
-
-
-  page.on('onmessage', () => {
-     console.log("HEEERE")
-  })
-  //await page.waitForNavigation();
-  //await page.click('Sign In');
-  //await page.click('button[type="submit"]');
-  console.log("RES5 = ", res5)
-  const text = await page.evaluate(() => {
-        ///const anchor = document.querySelector('#mw-content-text');
-        //return anchor.textContent;
+    window.addEventListener('message', async (e) => {
+      var data = JSON.parse(e.data);
+      var oAuthVerifier = data.oAuthVerifier;
+      console.log("oauth verifier = ", oAuthVerifier);
+      browser.close();
+      }, false);
+    //browser.close();
   });
-  console.log("text = ", text);
-
 })
