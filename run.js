@@ -1,7 +1,19 @@
 var request = require('request-promise');
 const puppeteer = require('puppeteer');
 
-function getTradeOAuthURL() {
+
+function getBrokerList() {
+  let options = {
+      method: 'post',
+      body: {'apiKey': 'tradeit-test-api-key'},
+      json: true,
+      url: 'https://ems.qa.tradingticket.com/api/v1/preference/getStocksOrEtfsBrokerList'
+  };
+
+  return request(options)
+}
+
+function getTradeOAuthURL(brokerName) {
   return new Promise((resolve, reject) => {
     let options = {
         method: 'post',
@@ -17,7 +29,7 @@ function getTradeOAuthURL() {
         } else if (res.status == 'SUCCESS'){
           var options = {
               method: 'post',
-              body: {'apiKey': 'tradeit-test-api-key',"broker":"Dummy"},
+              body: {'apiKey': 'tradeit-test-api-key','broker': brokerName},
               json: true,
               url: 'https://ems.qa.tradingticket.com/api/v1/user/getOAuthLoginPopupUrlForWebApp'
           };
@@ -121,7 +133,12 @@ function placeOrder(sessionToken, orderId) {
 }
 
 function runTradeWorkflow() {
-  getTradeOAuthURL()
+  getBrokerList()
+    .then(res => {
+      console.log("Broker list = ", res);
+      let brokerName = res.brokerList[0].shortName;
+      return getTradeOAuthURL(brokerName);
+    })
     .then(tradeOAuthURL => {
       console.log("tradeOauthURL = ", tradeOAuthURL);
       return getTradeOAuthVerifier(tradeOAuthURL);
