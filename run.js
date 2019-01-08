@@ -61,9 +61,12 @@ function getTradeOAuthVerifier(tradeOAuthURL) {
      await page.evaluate(() => {
        window.addEventListener('message', (e) => {
          let data = JSON.parse(e.data);
+         //TODO add browser.close here
          return resolve(data.oAuthVerifier);
        }, false);
      });
+
+     //browser.close();
    })
 }
 
@@ -145,6 +148,6 @@ getTradeOAuthURL()
   })
   .then(orderRes => {
     console.log("orderRes = ", orderRes);
-    //process.exit();
-
+    //TODO remove this line when you add browser.close
+    process.exit();
   });
