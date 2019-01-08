@@ -71,7 +71,7 @@ function getTradeOAuthVerifier(tradeOAuthURL) {
 }
 
 
-var getTradeItTokens = function(oAuthVerifier) {
+function getTradeItTokens(oAuthVerifier){
   let options = {
       method: 'post',
       body: {'apiKey': 'tradeit-test-api-key', 'oAuthVerifier': oAuthVerifier},
@@ -79,7 +79,6 @@ var getTradeItTokens = function(oAuthVerifier) {
       url: 'https://ems.qa.tradingticket.com/api/v1/user/getOAuthAccessToken'
     };
     return request(options);
-
 };
 
 function authenticate(userToken, userId){
@@ -121,33 +120,36 @@ function placeOrder(sessionToken, orderId) {
     return request(options);
 }
 
+function runTradeWorkflow() {
+  getTradeOAuthURL()
+    .then(tradeOAuthURL => {
+      console.log("tradeOauthURL = ", tradeOAuthURL);
+      return getTradeOAuthVerifier(tradeOAuthURL);
+    })
+    .then(tradeOAuthVerifier => {
+      console.log("VERIFIER = ", tradeOAuthVerifier);
+      return getTradeItTokens(tradeOAuthVerifier);
+    })
+    .then(userInfo => {
+      console.log("user information = ", userInfo);
+      return authenticate(userInfo.userToken, userInfo.userId);
+    })
+    .then(authRes => {
+      console.log("auth res = ", authRes)
+      let orderInfo = {symbol: 'GE', quantity:'10', action: 'sell', expiration: 'day', priceType: 'market'};
+      sessionToken = authRes.token;
+      let account = authRes.accounts[0];
+      return getPreviewOrder(authRes.token, account.accountNumber, orderInfo);
+    })
+    .then(orderPreview => {
+      console.log("order preview = ", orderPreview);
+      return placeOrder(sessionToken, orderPreview.orderId);
+    })
+    .then(orderRes => {
+      console.log("orderRes = ", orderRes);
+      //TODO remove this line when you add browser.close
+      process.exit();
+    });
+}
 
-getTradeOAuthURL()
-  .then(tradeOAuthURL => {
-    console.log("tradeOauthURL = ", tradeOAuthURL);
-    return getTradeOAuthVerifier(tradeOAuthURL);
-  })
-  .then(tradeOAuthVerifier => {
-    console.log("VERIFIER = ", tradeOAuthVerifier);
-    return getTradeItTokens(tradeOAuthVerifier);
-  })
-  .then(userInfo => {
-    console.log("user information = ", userInfo);
-    return authenticate(userInfo.userToken, userInfo.userId);
-  })
-  .then(authRes => {
-    console.log("auth res = ", authRes)
-    let orderInfo = {symbol: 'GE', quantity:'10', action: 'sell', expiration: 'day', priceType: 'market'};
-    sessionToken = authRes.token;
-    let account = authRes.accounts[0];
-    return getPreviewOrder(authRes.token, account.accountNumber, orderInfo);
-  })
-  .then(orderPreview => {
-    console.log("order preview = ", orderPreview);
-    return placeOrder(sessionToken, orderPreview.orderId);
-  })
-  .then(orderRes => {
-    console.log("orderRes = ", orderRes);
-    //TODO remove this line when you add browser.close
-    process.exit();
-  });
+runTradeWorkflow();
