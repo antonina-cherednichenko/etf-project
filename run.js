@@ -34,15 +34,14 @@ function getTradeOAuthURL() {
       })
    });
 }
-var browser;
 
 function getTradeOAuthVerifier(tradeOAuthURL) {
    return new Promise(async(resolve, reject) => {
-     //const browser = await puppeteer.launch({headless: true});
-     browser = await puppeteer.launch({
-       args: ['--disable-features=site-per-process'],
-       headless: false
-     });
+     const browser = await puppeteer.launch({headless: true});
+     // const browser = await puppeteer.launch({
+     //   args: ['--disable-features=site-per-process'],
+     //   headless: false
+     // });
      const page = await browser.newPage();
      await page.goto(tradeOAuthURL, { waitUntil: 'networkidle2'});
 
@@ -76,13 +75,76 @@ var getTradeItTokens = function(oAuthVerifier) {
       json: true,
       url: 'https://ems.qa.tradingticket.com/api/v1/user/getOAuthAccessToken'
     };
-    request(options);
+    return request(options);
 
 };
+
+function authenticate(userToken, userId){
+  let options = {
+      method: 'post',
+      body: {'apiKey': 'tradeit-test-api-key', 'userId': userId, 'userToken': userToken},
+      json: true,
+      url: 'https://ems.qa.tradingticket.com/api/v1/user/authenticate?srv='
+    };
+    return request(options);
+}
+
+function getPreviewOrder(sessionToken, accountNumber, orderInfo) {
+  var postData = {}
+  postData.token = sessionToken;
+  postData.accountNumber = accountNumber;
+
+  postData.orderSymbol = orderInfo.symbol;
+  postData.orderQuantity = orderInfo.quantity;
+  postData.orderAction = orderInfo.action;
+  postData.orderPriceType = orderInfo.priceType;
+  postData.orderExpiration = orderInfo.expiration;
+  let options = {
+      method: 'post',
+      body: postData,
+      json: true,
+      url: 'https://ems.qa.tradingticket.com/api/v1/order/previewStockOrEtfOrder'
+    };
+    return request(options);
+}
+
+function placeOrder(sessionToken, orderId) {
+  let options = {
+      method: 'post',
+      body: {'token': sessionToken, 'orderId': orderId},
+      json: true,
+      url: 'https://ems.qa.tradingticket.com/api/v1/order/placeStockOrEtfOrder'
+    };
+    return request(options);
+}
+
 
 getTradeOAuthURL()
   .then(tradeOAuthURL => {
     console.log("tradeOauthURL = ", tradeOAuthURL);
     return getTradeOAuthVerifier(tradeOAuthURL);
   })
-  .then(tradeOAuthVerifier => console.log("VERIFIER = ", tradeOAuthVerifier));
+  .then(tradeOAuthVerifier => {
+    console.log("VERIFIER = ", tradeOAuthVerifier);
+    return getTradeItTokens(tradeOAuthVerifier);
+  })
+  .then(userInfo => {
+    console.log("user information = ", userInfo);
+    return authenticate(userInfo.userToken, userInfo.userId);
+  })
+  .then(authRes => {
+    console.log("auth res = ", authRes)
+    let orderInfo = {symbol: 'GE', quantity:'10', action: 'sell', expiration: 'day', priceType: 'market'};
+    sessionToken = authRes.token;
+    let account = authRes.accounts[0];
+    return getPreviewOrder(authRes.token, account.accountNumber, orderInfo);
+  })
+  .then(orderPreview => {
+    console.log("order preview = ", orderPreview);
+    return placeOrder(sessionToken, orderPreview.orderId);
+  })
+  .then(orderRes => {
+    console.log("orderRes = ", orderRes);
+    //process.exit();
+
+  });
