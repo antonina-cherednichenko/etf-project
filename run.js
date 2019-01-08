@@ -14,37 +14,13 @@ function getBrokerList() {
 }
 
 function getTradeOAuthURL(brokerName) {
-  return new Promise((resolve, reject) => {
-    let options = {
-        method: 'post',
-        body: {'apiKey': 'tradeit-test-api-key'},
-        json: true,
-        url: 'https://ems.qa.tradingticket.com/api/v1/preference/getStocksOrEtfsBrokerList'
-    };
-
-    request(options)
-      .then(res => {
-        if (res.status == 'ERROR'){
-          reject();
-        } else if (res.status == 'SUCCESS'){
-          var options = {
-              method: 'post',
-              body: {'apiKey': 'tradeit-test-api-key','broker': brokerName},
-              json: true,
-              url: 'https://ems.qa.tradingticket.com/api/v1/user/getOAuthLoginPopupUrlForWebApp'
-          };
-          return request(options);
-        }
-    })
-     .then(res => {
-        if(res.status == 'ERROR'){
-              return reject('Error getting oAuthURL');
-          }
-          else if(res.status == 'SUCCESS'){
-              return resolve(res.oAuthURL);
-          }
-      })
-   });
+  let options = {
+      method: 'post',
+      body: {'apiKey': 'tradeit-test-api-key','broker': brokerName},
+      json: true,
+      url: 'https://ems.qa.tradingticket.com/api/v1/user/getOAuthLoginPopupUrlForWebApp'
+   };
+   return request(options);
 }
 
 function getTradeOAuthVerifier(tradeOAuthURL) {
@@ -77,8 +53,6 @@ function getTradeOAuthVerifier(tradeOAuthURL) {
          return resolve(data.oAuthVerifier);
        }, false);
      });
-
-     //browser.close();
    })
 }
 
@@ -139,9 +113,9 @@ function runTradeWorkflow() {
       let brokerName = res.brokerList[0].shortName;
       return getTradeOAuthURL(brokerName);
     })
-    .then(tradeOAuthURL => {
-      console.log("tradeOauthURL = ", tradeOAuthURL);
-      return getTradeOAuthVerifier(tradeOAuthURL);
+    .then(tradeOAuthInfo => {
+      console.log("tradeOauthURL = ", tradeOAuthInfo);
+      return getTradeOAuthVerifier(tradeOAuthInfo.oAuthURL);
     })
     .then(tradeOAuthVerifier => {
       console.log("VERIFIER = ", tradeOAuthVerifier);
