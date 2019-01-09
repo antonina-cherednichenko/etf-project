@@ -28,12 +28,19 @@ contract ETFCrowdsale is MintedCrowdsale {
     return true;
   } */
 
+  function updateBasketPrice(uint256 _price)
+    public returns (bool)
+  {
+    price = _price;
+    return true;
+  }
+
   /**
    * @dev Overrides parent method taking into account variable rate.
    * @param weiAmount The value in wei to be converted into tokens
    * @return The number of tokens _weiAmount wei will buy at present time
    */
-  function _getTokenAmount(uint256 weiAmount, uint256 price)
+  function _getTokenAmount(uint256 weiAmount)
     internal view returns (uint256)
   {
     /* return weiAmount.div(getBasketPrice()); */

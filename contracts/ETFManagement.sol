@@ -1,17 +1,19 @@
 pragma solidity >=0.4.21 <0.6.0;
 
+import "./ETFCrowdsale.sol";
+
 contract ETFManagement {
 
-  address public crowdsale;
+  address payable public crowdsale;
 
-  constructor(address _crowdsale) public {
+  constructor(address payable _crowdsale) public {
     crowdsale = _crowdsale;
   }
 
   function getInfo()
     public
     view
-    returns (bytes info)
+    returns (bytes memory info)
   {
        return "Security basket for S&P 500: 1) SPDR S&P 500 ETF (SPY), 2) iShares Core S&P 500 ETF (IVV) 3) Vanguard S&P 500 ETF (VOO)";
   }
@@ -21,10 +23,9 @@ contract ETFManagement {
     payable
     returns (bool success)
   {
-     require(msg.value >= tokenAmount * price);
-     //Buy selected basket of securities, if not succesful refund money
-     //if successfule send tokens to the beneficiary
-     crowdsale.buyTokens.value(msg.value)(msg.sender, price);
+     ETFCrowdsale etfCrowdsale = ETFCrowdsale(crowdsale);
+     etfCrowdsale.updateBasketPrice(price);
+     etfCrowdsale.buyTokens(msg.sender);
      return true;
   }
 
