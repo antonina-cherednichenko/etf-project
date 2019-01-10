@@ -1,5 +1,10 @@
+const Web3 = require("web3");
 
+const DEFAULT_HTTP_PROVIDER = "http://localhost:8545";
+const web3 = new Web3(new Web3.providers.HttpProvider(DEFAULT_HTTP_PROVIDER));
 let config = {}
+
+config.web3 = web3;
 
 config.coin = {
   "name": "ETFCoin",
@@ -8,8 +13,13 @@ config.coin = {
 }
 
 config.etf = {
-  "description": "Security basket for S&P 500: 1) SPDR S&P 500 ETF (SPY), 2) iShares Core S&P 500 ETF (IVV) 3) Vanguard S&P 500 ETF (VOO)",
-  "basket":["SPY", "IVV", "VOO"]
+  //"description": web3.utils.fromAscii('Security basket for S&P 500: SPY, IVV, VOO'),
+  "description": web3.utils.fromAscii('Security basket for S&P 500'),
+  "basket":[
+    web3.utils.fromAscii("SPY"),
+    web3.utils.fromAscii("IVV"),
+    web3.utils.fromAscii("VOO")
+  ]
 }
 
 config.tokens = {
