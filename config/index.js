@@ -17,3 +17,5 @@ config.tokens = {
   //TODO change that with proper address
   "fundWallet": '0x000000000000000000000000000000000000dead'
 }
+
+module.exports = config;

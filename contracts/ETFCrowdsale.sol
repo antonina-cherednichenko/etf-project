@@ -28,6 +28,19 @@ contract ETFCrowdsale is MintedCrowdsale {
     return true;
   } */
 
+  constructor (
+        uint256 rate,
+        address payable wallet,
+        ERC20Mintable token
+    )
+        public
+        Crowdsale(rate, wallet, token)
+    {
+        //As goal needs to be met for a successful crowdsale
+        //the value needs to less or equal than a cap which is limit for accepted funds
+        //require(goal <= cap);
+    }
+
   function updateBasketPrice(uint256 _price)
     public returns (bool)
   {
