@@ -1,5 +1,20 @@
-const Web3 = require("web3");
+const contractsService = require("./contracts");
 
 
-const DEFAULT_HTTP_PROVIDER = "http://localhost:8545";
-const web3 = new Web3(new Web3.providers.HttpProvider(DEFAULT_HTTP_PROVIDER));
+function buyTokens() {
+  console.log("heeere")
+  return new Promise((resolve, reject) => {
+    contractsService.getData()
+      .then(contracts => {
+        console.log("Contracts = HELLO");
+        resolve(contracts);
+      })
+  })
+
+
+
+}
+
+buyTokens().then(res => {
+   //console.log("contracts = ", res)
+})

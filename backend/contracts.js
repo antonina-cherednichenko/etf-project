@@ -21,7 +21,7 @@ async function getData() {
     let ETFCrowdsale = contract(require('../build/contracts/ETFCrowdsale.json'));
     ETFCrowdsale.setProvider(config.web3.currentProvider);
 
-    web3.eth.getAccounts(function(err, accounts) {
+    config.web3.eth.getAccounts(function(err, accounts) {
       if (err != null) {
         return reject(err);
       }
@@ -33,11 +33,14 @@ async function getData() {
       contractsData.accounts = accounts;
 
       ETFCoin.deployed()
-        .then(instance => contractsData.etfCoin = instance;)
+        .then(instance => contractsData.etfCoin = instance)
         .then(() => ETFCrowdsale.deployed())
-        .then(instance => contractsData.etfCrowdsale = instance;)
+        .then(instance => contractsData.etfCrowdsale = instance)
         .then(() => ETFManagement.deployed())
-        .then(instance => contractsData.etfManagement = instance;)
+        .then(instance => {
+          contractsData.etfManagement = instance;
+          return resolve(contractsData);
+        })
         .catch(err => reject({error: "Deploying of contracts failed with an error" + err}))
     });
   })
